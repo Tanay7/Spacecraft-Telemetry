@@ -1,4 +1,4 @@
-# TelemetryRx: Spacecraft Telemetry Receiver
+# Spacecraft Telemetry Receiver
 
 ## Author: Tanay
 
