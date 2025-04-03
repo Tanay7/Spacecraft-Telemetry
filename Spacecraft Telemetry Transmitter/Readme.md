@@ -1,145 +1,148 @@
 # Spacecraft Telemetry Transmitter
 
-**Author:** Tanay
+## Author: Tanay
 
 ## Overview
 
-This Arduino code implements a telemetry transmitter designed for a simulated spacecraft. It collects data from various onboard sensors and transmits this information wirelessly using LoRa communication. The transmitted data is structured according to the Consultative Committee for Space Data Systems (CCSDS) standards, ensuring compatibility with common space communication protocols. To enhance data reliability over the radio link, Reed-Solomon Forward Error Correction (RS-FEC) is applied to the telemetry packets. An optional U8g2 display provides real-time visualization of sensor readings and system status. This project serves as an educational demonstration of fundamental spacecraft telemetry concepts, drawing inspiration from missions like Voyager 1.
+This Arduino code implements a telemetry transmitter designed for a simulated spacecraft. It gathers data from various onboard sensors, including environmental, magnetic, inertial, GPS, and power management units. This sensor data is then structured into CCSDS (Consultative Committee for Space Data Systems) compliant packets, a standard used in real-world space missions like Voyager 1. To ensure reliable data transmission over a LoRa radio link, Reed-Solomon Forward Error Correction (RS-FEC) is applied to the telemetry packets.
 
-## Key Features
+The code initializes and reads data from the BME280 environmental sensor, QMC6310 magnetometer, QMI8658 Inertial Measurement Unit (IMU), a GPS module, and a Power Management Unit (PMU). This data is then formatted into a CCSDS Application Packet (AP). The packet is encoded using RS(255, 223) FEC to add redundancy for error correction during transmission. Finally, the encoded packet is transmitted using an SX1262 LoRa transceiver, managed by the RadioLib library.
 
-* **Sensor Data Acquisition:** Reads data from a comprehensive suite of sensors:
-    * **Environmental:** Temperature, pressure, humidity, and altitude from the BME280 sensor.
-    * **Magnetic Field:** Three-axis measurements from the QMC6310 magnetometer.
-    * **Inertial:** Accelerometer (X, Y, Z), gyroscope (X, Y, Z), and temperature from the QMI8658 Inertial Measurement Unit (IMU).
-    * **GPS:** Location (latitude, longitude, altitude), date, time, number of satellites in view, and Horizontal Dilution of Precision (HDOP) from a GPS module.
-    * **Power Management Unit (PMU):** Battery voltage, charge percentage, charging status, VBUS voltage, and system voltage.
-* **CCSDS Packetization:** Structures sensor data into CCSDS Application Packets (APs) for standardized telemetry transmission.
-* **LoRa Communication:** Utilizes the SX1262 LoRa transceiver and the RadioLib library for robust wireless data transmission. Configurable parameters include frequency, transmit power, bandwidth, spreading factor, and coding rate.
-* **Reed-Solomon FEC:** Implements RS(255, 223) Reed-Solomon Forward Error Correction to improve data integrity by adding redundancy.
-* **Optional Display:** Supports an U8g2 monochrome display for visualizing real-time sensor readings and system information through a series of rotating screens.
-* **Data Integrity:** Includes a CRC-16 checksum (CCITT-FALSE algorithm) within the telemetry packet for error detection at the receiver.
-* **Packet Sequencing:** Incorporates a packet sequence counter for tracking transmitted packets.
-* **Error Handling:** Includes basic checks for sensor initialization and a fatal error display routine.
+An optional U8g2 display can be used to visualize the current sensor readings and system status on the transmitting end. The code also includes basic error handling for sensor initialization and a fatal error display routine for critical failures.
+
+## Features
+
+* **Multi-Sensor Data Acquisition:** Reads data from BME280 (temperature, pressure, humidity, altitude), QMC6310 (magnetic field), QMI8658 (accelerometer, gyroscope, temperature), GPS (location, time, satellites, HDOP), and PMU (battery voltage, percentage, charging, VBUS, system voltage).
+* **CCSDS Packet Generation:** Structures the sensor data into CCSDS Application Packets (APs) following the Packet Utilization Standard for low-rate telemetry.
+* **Reed-Solomon FEC Encoding:** Applies RS(255, 223) encoding to the CCSDS packets, adding 32 bytes of parity data for every 223 bytes of sensor data, enabling error correction on the receiving end.
+* **LoRa Radio Transmission:** Utilizes the RadioLib library to control an SX1262 LoRa transceiver for transmitting the encoded telemetry data at 433.0 MHz.
+* **Optional U8g2 Display Visualization:** Supports an optional U8g2 monochrome display to show real-time sensor readings and system information.
+* **Basic Error Handling:** Includes checks for successful initialization of key sensors and a routine to display fatal error messages.
+* **Packet Sequencing:** Implements a packet sequence counter within the CCSDS header for tracking transmitted packets.
+* **CRC Checksum:** Calculates and includes a CRC-16 checksum (CCITT-FALSE) within the telemetry packet for data integrity verification by the receiver.
 
 ## Hardware Requirements
 
 * Arduino-compatible microcontroller (specific board defined in `LoRaBoards.h`)
-* SX1262 LoRa Transceiver Module
+* SX1262 LoRa Transceiver module
 * BME280 Environmental Sensor
 * QMC6310 Magnetometer
 * QMI8658 Inertial Measurement Unit (IMU)
 * GPS Module (with serial output)
-* Power Management Unit (PMU) - Integrated PMU on the target board
-* Optional: U8g2 compatible monochrome display (e.g., OLED or LCD)
+* PMU (Power Management Unit) compatible with the code's PMU access methods
+* (Optional) U8g2 compatible monochrome display
+* Wiring to connect all sensors, the LoRa transceiver, and the display to the microcontroller. Refer to `LoRaBoards.h` for pin assignments.
 
-**Note:** Pin assignments and board-specific configurations are likely defined in the `LoRaBoards.h` file.
+## Software Requirements
 
-## Software Requirements (Libraries)
+* Arduino IDE installed.
+* The following Arduino libraries need to be installed via the Arduino Library Manager or by manually downloading and placing them in your Arduino libraries folder:
+    * **RadioLib:** [https://github.com/jgromes/RadioLib](https://github.com/jgromes/RadioLib)
+    * **Adafruit BME280 Library:** [https://github.com/adafruit/Adafruit_BME280_Library](https://github.com/adafruit/Adafruit_BME280_Library)
+    * **U8g2lib:** [https://github.com/olikraus/u8g2](https://github.com/olikraus/u8g2)
+    * **TinyGPS++:** [http://arduinogps.jjoe.org/](http://arduinogps.jjoe.org/)
+* **LoRaBoards.h:** This is a board-specific header file containing pin definitions and should be included in the project. This file is likely custom and dependent on the specific hardware setup.
+* **SensorQMC6310.hpp:** Custom library for the QMC6310 magnetometer. Ensure this file is in your sketch directory.
+* **SensorQMI8658.hpp:** Custom library for the QMI8658 IMU. Ensure this file is in your sketch directory.
+* **RS-FEC.h:** This header file provides the Reed-Solomon Forward Error Correction implementation. The source of this library is not explicitly mentioned in the code. Ensure you have the correct `RS-FEC.h` and its associated `.cpp` file (if any) in your project.
+* Standard Arduino libraries (`Wire.h`, `SPI.h`, `math.h`, `stdio.h`) are typically included with the Arduino IDE.
 
-* **RadioLib:** For LoRa radio communication ([https://github.com/jgromes/RadioLib](https://github.com/jgromes/RadioLib))
-* **LoRaBoards.h:** Board-specific definitions for RadioLib (likely a custom file specific to the hardware setup).
-* **Wire.h:** For I2C communication (used by BME280, QMC6310, and U8g2 display).
-* **SPI.h:** For SPI communication (used by QMI8658 and potentially the LoRa module or SD card if used within the QMI8658 library).
-* **Adafruit_Sensor.h & Adafruit_BME280.h:** For interfacing with the BME280 sensor ([https://github.com/adafruit/Adafruit_BME280_Library](https://github.com/adafruit/Adafruit_BME280_Library)).
-* **SensorQMC6310.hpp & SensorQMI8658.hpp:** Custom sensor libraries for the QMC6310 magnetometer and QMI8658 IMU (these might be user-defined or provided by the sensor vendor).
-* **U8g2lib.h:** For controlling the U8g2 monochrome display ([https://github.com/olikraus/u8g2](https://github.com/olikraus/u8g2)).
-* **math.h:** For mathematical functions (e.g., `atan2`, `M_PI`, `pow`).
-* **RS-FEC.h:** For Reed-Solomon Forward Error Correction (the source of this library is not explicitly mentioned and might be custom or from a specific library that needs to be identified and potentially linked here).
-* **TinyGPS++.h:** For parsing data from the GPS module ([http://arduinogps.jjoe.org/](http://arduinogps.jjoe.org/)).
-* **stdio.h:** For standard input/output functions, specifically `sprintf` in this code.
+## Installation
 
-**Installation:**
-
-1.  Ensure you have the Arduino IDE installed on your system.
-2.  Install the required libraries using the Arduino Library Manager (Sketch > Include Library > Manage Libraries...). Search for and install:
-    * RadioLib by Jan Gromes
-    * Adafruit BME280 Library by Adafruit
-    * Adafruit Unified Sensor by Adafruit
-    * U8g2 by olikraus
-    * TinyGPSPlus by Mikal Hart
-3.  Obtain the custom sensor libraries (`SensorQMC6310.hpp` and `SensorQMI8658.hpp`) and the Reed-Solomon FEC library (`RS-FEC.h`). Place these files in the same directory as your `TelemetryTx.ino` sketch, or within the Arduino libraries folder.
-4.  Ensure you have the `LoRaBoards.h` file configured correctly for your specific hardware setup, defining pin assignments for the LoRa module and other peripherals.
-5.  Connect the sensors, LoRa module, display (if used), and GPS module to your Arduino-compatible microcontroller according to the pin definitions in `LoRaBoards.h` and the sensor/module datasheets.
-6.  Open the `TelemetryTx.ino` file in the Arduino IDE.
-7.  Select the correct board and port in the Arduino IDE (Tools > Board and Tools > Port).
-8.  Upload the code to your microcontroller.
-
-## Usage
-
-Once the code is uploaded and running, the system will:
-
-1.  Initialize the sensors and the LoRa radio.
-2.  Continuously read data from the connected sensors at a defined interval.
-3.  Format the sensor data into CCSDS telemetry packets.
-4.  Apply Reed-Solomon Forward Error Correction to the packets.
-5.  Transmit the encoded packets wirelessly using the LoRa radio.
-6.  Optionally, display sensor readings and system status on the connected U8g2 display, cycling through different screens.
-
-You will need a compatible LoRa receiver configured to the same parameters (frequency, bandwidth, spreading factor, coding rate, and sync word) to receive and decode the telemetry data. The received data will also need to be processed to remove the Reed-Solomon FEC and interpret the CCSDS packet structure.
+1.  **Install Arduino IDE:** Download and install the Arduino IDE from the official Arduino website.
+2.  **Install Required Libraries:**
+    * Open the Arduino IDE.
+    * Go to `Sketch` > `Include Library` > `Manage Libraries...`.
+    * Search for and install the following libraries: `RadioLib`, `Adafruit BME280 Library`, `U8g2`, and `TinyGPS++`.
+    * Place the `LoRaBoards.h`, `SensorQMC6310.hpp`, `SensorQMI8658.hpp`, and `RS-FEC.h` (and any associated `.cpp` files) in the same directory as your `TelemetryTx.ino` sketch.
+3.  **Connect Hardware:** Connect all the sensors, the LoRa transceiver, and the optional U8g2 display to your Arduino board according to the pin definitions specified in `LoRaBoards.h` and the sensor library documentation. Ensure proper power and ground connections.
+4.  **Upload Code:**
+    * Open the `TelemetryTx.ino` file in the Arduino IDE.
+    * Select the correct board and port from the `Tools` menu.
+    * Click the `Upload` button to compile and upload the code to your Arduino board.
 
 ## Configuration
 
-The following parameters can be configured within the `TelemetryTx.ino` file:
+The following parameters in the code can be configured:
 
-* **Spacecraft Identification:** Modify the `SPACECRAFT_ID` macro to set a unique identifier for your simulated spacecraft.
-* **CCSDS Packet Parameters:** The APID (`CCSDS_APID`), version (`CCSDS_VERSION`), type (`CCSDS_TYPE`), secondary header flag (`CCSDS_SEC_HDR_FLAG`), and sequence flags (`CCSDS_SEQ_FLAGS`) are defined as macros and can be adjusted if needed.
-* **Reed-Solomon FEC Parameters:** The message length (`rsMsgLen`) and ECC length (`ECC_LENGTH`) are defined as constants. Ensure the `RS::ReedSolomon` template instantiation matches these values.
+* **Spacecraft Identification:**
+    * `SPACECRAFT_ID`: Defines the identifier string for the simulated spacecraft.
+* **CCSDS Packet Parameters:**
+    * `CCSDS_APID`: Sets the Application Process Identifier for the CCSDS packets.
+    * `CCSDS_VERSION`, `CCSDS_TYPE`, `CCSDS_SEC_HDR_FLAG`, `CCSDS_SEQ_FLAGS`: Define the respective fields in the CCSDS primary header.
+* **Reed-Solomon FEC Parameters:**
+    * `rsMsgLen`: Specifies the length of the data payload (must match the receiver).
+    * `ECC_LENGTH`: Defines the length of the error correction code (must match the receiver).
 * **LoRa Radio Configuration:**
-    * `CARRIER_FREQ`: LoRa carrier frequency in MHz (default: 433.0 MHz).
-    * `TX_POWER`: LoRa transmit power in dBm (default: 20 dBm).
-    * `BANDWIDTH`: LoRa bandwidth in kHz (default: 125.0 kHz).
-    * `SPREADING_FACTOR`: LoRa spreading factor (default: 12).
-    * `CODING_RATE`: LoRa coding rate (default: 6).
-    * `SYNC_WORD`: LoRa sync word (network ID) (default: 0x35).
-* **Sensor Update Interval:** The `sensorUpdateInterval` constant (in milliseconds) controls how frequently sensor data is read.
-* **Display Screen Delay:** The `defaultScreenDelay` and `gpsScreenDelay` constants (in milliseconds) control the duration each screen is displayed on the U8g2 display.
-* **GPS Serial Port:** The serial port used for the GPS module is initialized with `SerialGPS.begin(9600);`. Adjust the baud rate if your GPS module requires a different setting.
-* **Sea Level Pressure:** The `SEALEVELPRESSURE_HPA` constant is used for altitude calculation by the BME280 sensor. You may need to adjust this value based on your local atmospheric conditions for more accurate altitude readings.
-* **Magnetic Declination:** The `declination` variable in the `updateQMC6310Data()` function is set for Galway, Ireland. You should update this value to the magnetic declination for your specific location to obtain accurate compass heading readings.
+    * `CARRIER_FREQ`: Sets the LoRa carrier frequency in MHz (must match the receiver).
+    * `TX_POWER`: Configures the LoRa transmit power in dBm.
+    * `BANDWIDTH`: Sets the LoRa bandwidth in kHz (must match the receiver).
+    * `SPREADING_FACTOR`: Defines the LoRa spreading factor (must match the receiver).
+    * `CODING_RATE`: Sets the LoRa coding rate (must match the receiver).
+    * `SYNC_WORD`: Configures the LoRa sync word (network ID) (must match the receiver).
+* **Sensor Update Intervals:**
+    * `sensorUpdateInterval`: Controls the frequency at which sensor data is read (in milliseconds).
+* **Display Settings:**
+    * `defaultScreenDelay`, `gpsScreenDelay`: Determine the duration for which each screen is displayed on the optional U8g2 display (in milliseconds).
+* **Sea Level Pressure:**
+    * `SEALEVELPRESSURE_HPA`: Used for calculating altitude from the BME280 sensor. Adjust this value based on your local atmospheric conditions for more accurate altitude readings.
 
-**Note:** Refer to the datasheets of your specific hardware components for recommended configuration values.
+**Important:** Ensure that the LoRa radio configuration parameters (`CARRIER_FREQ`, `BANDWIDTH`, `SPREADING_FACTOR`, `CODING_RATE`, `SYNC_WORD`) and the Reed-Solomon FEC parameters (`rsMsgLen`, `ECC_LENGTH`) **exactly match** the configuration of the receiving telemetry system (`TelemetryRx.ino`).
 
-## Error Handling
+## Usage
 
-The code includes basic error handling for sensor initialization. If any of the sensors (BME280, QMC6310, or QMI8658) fail to initialize, a fatal error message will be displayed on the U8g2 display (if connected) using the `displayFatalError()` function, and the system will halt.
+Once the code is uploaded and running, the microcontroller will start reading data from the connected sensors, building CCSDS telemetry packets, encoding them with Reed-Solomon FEC, and transmitting them over the LoRa radio link.
 
-## Educational Purpose
-
-This code is intended for educational purposes and serves as a demonstration of fundamental concepts in spacecraft telemetry, including:
-
-* Sensor data acquisition from various types of sensors.
-* Data structuring according to space communication standards (CCSDS).
-* Wireless data transmission using LoRa technology.
-* Improving data reliability through Forward Error Correction (Reed-Solomon).
-* Real-time data visualization.
-
-## Target Platform
-
-This code is designed to be compatible with Arduino-compatible microcontrollers. The specific target board is defined in the `LoRaBoards.h` file, which likely contains pin definitions and other board-specific configurations.
-
-## LoRa Frequency
-
-The LoRa communication is configured to operate at a frequency of 433.0 MHz. This can be changed by modifying the `CARRIER_FREQ` macro. Ensure that the chosen frequency is compliant with the regulations in your region.
+* **Serial Output:** The code initializes serial communication for debugging. You can use the Serial Monitor in the Arduino IDE to observe any debug messages or error outputs.
+* **Optional U8g2 Display:** If a U8g2 display is connected and the `U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);` line is uncommented (and the correct constructor is used for your display), the display will cycle through different screens showing real-time readings from the connected sensors.
+* **LoRa Transmission:** The encoded telemetry packets will be transmitted wirelessly via the LoRa radio at the configured frequency and settings. Ensure that a compatible LoRa receiver (like the `TelemetryRx.ino` code) is within range and configured to the same LoRa parameters to receive the data.
 
 ## CCSDS Packet Structure Notes
 
-The telemetry data is encapsulated within a CCSDS Application Packet (AP). The primary header includes the following fields:
+The telemetry data is encapsulated within CCSDS Application Packets (APs). The structure implemented in this code follows these guidelines:
 
-* **Packet Version Number (3 bits):** Set to `0b000` (CCSDS version).
-* **Type Indicator (1 bit):** Set to `0b0` (Telemetry Packet).
-* **Secondary Header Flag (1 bit):** Set to `0b1`, indicating the presence of a secondary header (although a secondary header is not explicitly implemented in this basic example).
-* **Application Process Identifier (APID) (11 bits):** Set to `0x7FF` as an example value. This should be a unique identifier for the telemetry application.
-* **Sequence Flags (2 bits):** Set to `0b11` (Continuation Segment), assuming packets might be segmented if the data payload becomes larger in more complex scenarios. In this example, single packets are likely sent.
-* **Packet Sequence Count (14 bits):** A counter that increments with each transmitted packet, modulo 16384.
-* **Packet Length Field (2 bytes):** Indicates the length of the packet data field minus one, in bytes.
-
-The data field of the CCSDS packet includes the spacecraft ID, mission time, sensor readings, PMU data, a message string, and the CRC-16 checksum.
+* **Primary Header:** Consists of:
+    * **Packet Version Number (3 bits):** Set to `0b000` (CCSDS version).
+    * **Type Indicator (1 bit):** Set to `0b0` (Telemetry Packet).
+    * **Secondary Header Flag (1 bit):** Set to `0b1` (Presence of Secondary Header - although a secondary header is not explicitly used in this basic example).
+    * **Application Process Identifier (APID) (11 bits):** Set to `0x7FF` (example value, can be changed).
+    * **Sequence Flags (2 bits):** Set to `0b11` (Continuation Segment - assuming packets are segmented if needed, though this example likely sends single packets).
+    * **Packet Sequence Count (14 bits):** A counter that increments with each transmitted packet.
+    * **Packet Length Field (16 bits):** Indicates the length of the packet data field minus one, in bytes.
+* **Data Field:** Contains the sensor readings and other telemetry data as defined in the `CCSDSPacket` struct.
+* **Packet Error Control (Optional):** A CRC-16 checksum (CCITT-FALSE) is calculated over the entire packet (excluding the CRC field itself) and appended for error detection.
 
 ## Reed-Solomon FEC Notes
 
-Reed-Solomon Forward Error Correction (RS-FEC) is implemented using an RS(255, 223) code. This means that for every 223 bytes of sensor data, 32 bytes of parity information are added. These parity bytes allow the receiver to detect and correct errors that may occur during transmission, significantly improving the reliability of the telemetry link, especially over longer distances or in noisy environments.
+The code employs an RS(255, 223) Reed-Solomon code for Forward Error Correction. This means that for every block of 223 bytes of telemetry data, 32 bytes of parity information are added. This redundancy allows the receiver to correct up to 16 byte errors within each 255-byte block, significantly improving the reliability of data transmission, especially in noisy environments or over longer distances.
 
 ## Voyager 1 Context
 
-The design of this telemetry transmitter draws inspiration from spacecraft missions like Voyager 1. Voyager 1, launched in 1977 and still operational, transmits scientific data back to Earth from interstellar space. While Voyager utilizes the Deep Space Network (DSN) for communication over vast distances, this project employs LoRa for shorter-range communication, demonstrating similar fundamental principles of telemetry data acquisition, packetization according to standards like CCSDS, and the use of error correction techniques like Reed-Solomon to ensure data integrity. The types of sensor data included in this code (environmental, magnetic, inertial, and positional) are representative of the data collected by spacecraft like Voyager, although the actual sensor suite on Voyager is far more extensive and sophisticated. This project provides a simplified yet illustrative example of the complex telemetry systems used in real-world space missions.
+The code's use of CCSDS packet structures and error correction techniques like Reed-Solomon FEC is inspired by real spacecraft communication systems, such as the Voyager 1 mission. Voyager 1, launched in 1977 and still operational, transmits scientific data back to Earth from interstellar space. Due to the vast distances involved, the signals are extremely weak and prone to errors. Therefore, robust communication protocols and error correction codes, including CCSDS standards and variations of Reed-Solomon codes, are essential for ensuring the integrity of the received data. This simulated telemetry system demonstrates some of the fundamental principles behind spacecraft communication.
+
+## Error Handling
+
+The code includes basic error handling:
+
+* **Sensor Initialization Checks:** During the `setup()` function, the code attempts to initialize the BME280, QMC6310, and QMI8658 sensors. If any of these initialization attempts fail, the `displayFatalError()` function is called.
+* **Fatal Error Display:** The `displayFatalError()` function prints an error message to the serial monitor and, if a U8g2 display is connected, displays a "SYSTEM FAILURE" message along with the specific error. The program then enters an infinite loop, potentially blinking an LED (if `LED_BUILTIN` is defined) to indicate a critical failure.
+
+## Contributing
+
+Contributions to this project are welcome. If you find any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request on the project's repository (if hosted on a platform like GitHub).
+
+## License
+
+[Specify the license under which this code is released, e.g., MIT License, Apache License 2.0, etc. If no license is specified, the default copyright rules apply.]
+
+## Acknowledgments
+
+* This code utilizes the excellent **RadioLib** library by [mention the author or organization if known] for LoRa communication.
+* The **Adafruit BME280 Library** by Adafruit Industries is used for interfacing with the BME280 sensor.
+* The **U8g2lib** library by [mention the author or organization, typically olikraus] is used for controlling the monochrome display.
+* The **SensorQMC6310** and **SensorQMI8658** libraries are custom implementations likely provided by the sensor vendor or a third party.
+* The **TinyGPS++** library by [mention the author, typically Mikal Hart] is used for parsing GPS data.
+* The Reed-Solomon FEC implementation is provided by the `RS-FEC.h` library [mention the source or author if known].
+* The CCSDS packet structure is based on the standards defined by the Consultative Committee for Space Data Systems.
+
+
