@@ -1,4 +1,4 @@
-# Spacecraft Telemetry System Simulation
+# Voyager 1 Spacecraft Telemetry System Simulation
 
 ## Author: Tanay
 
