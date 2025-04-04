@@ -4,7 +4,7 @@
 
 ## Introduction
 
-This project simulates a basic spacecraft telemetry system, demonstrating the fundamental principles of data acquisition, packetization, error correction, and wireless communication. It consists of two main components: a transmitter (`Transmit_Interrupt.ino`) that simulates a spacecraft gathering sensor data and sending it to Earth, and a receiver (`Receive_Interrupt.ino`) that simulates a ground station receiving and processing this data. The system utilizes LoRa radio for communication, structures data into CCSDS (Consultative Committee for Space Data Systems) compliant packets, and employs Reed-Solomon Forward Error Correction (RS-FEC) for robust data transmission. **This project was built and tested using the LilyGO T-Beam Supreme module.**
+This project simulates a basic spacecraft telemetry system, demonstrating the fundamental principles of data acquisition, packetization, error correction, and wireless communication. It consists of two main components: a **transmitter** (code available at [https://github.com/Tanay7/Spacecraft-Telemetry/tree/main/Spacecraft%20Telemetry%20Transmitter](https://github.com/Tanay7/Spacecraft-Telemetry/tree/main/Spacecraft%20Telemetry%20Transmitter)) that simulates a spacecraft gathering sensor data and sending it to Earth, and a **receiver** (code available at [https://github.com/Tanay7/Spacecraft-Telemetry/tree/main/Spacecraft%20Telemetry%20Receiver](https://github.com/Tanay7/Spacecraft-Telemetry/tree/main/Spacecraft%20Telemetry%20Receiver)) that simulates a ground station receiving and processing this data. The system utilizes LoRa radio for communication, structures data into CCSDS (Consultative Committee for Space Data Systems) compliant packets, and employs Reed-Solomon Forward Error Correction (RS-FEC) for robust data transmission. **This project was built and tested using the LilyGO T-Beam Supreme module.**
 
 ## Voyager 1 Context
 
@@ -17,6 +17,8 @@ The design of this telemetry system draws inspiration from real-world spacecraft
 * **Sensor Data:** Voyager 1 carries a suite of sophisticated scientific instruments to study planetary environments, magnetic fields, and cosmic rays. The types of sensor data simulated in our project (environmental, magnetic, inertial, GPS, power management) are representative of the kinds of information collected by spacecraft, albeit in a simplified form.
 
 ## Transmitter (`Transmit_Interrupt.ino`)
+
+**(Full code available at: [https://github.com/Tanay7/Spacecraft-Telemetry/tree/main/Spacecraft%20Telemetry%20Transmitter](https://github.com/Tanay7/Spacecraft-Telemetry/tree/main/Spacecraft%20Telemetry%20Transmitter))**
 
 ### Overview
 
@@ -57,10 +59,10 @@ The transmitter code simulates a spacecraft collecting data from various sensors
 
 ### Installation (Transmitter)
 
-1.  Install the Arduino IDE and the required libraries as detailed in the individual `Transmit_Interrupt.ino` README.
-2.  Place the custom header files (`LoRaBoards.h`, `SensorQMC6310.hpp`, `SensorQMI8658.hpp`, `RS-FEC.h`) in the same directory as the `Transmit_Interrupt.ino` sketch.
-3.  Connect the hardware components to the microcontroller according to the pin definitions in `LoRaBoards.h` and the sensor documentation.
-4.  Upload the `Transmit_Interrupt.ino` sketch to the Arduino board.
+1.  Install the Arduino IDE and the required libraries as detailed in the individual `Transmit_Interrupt.ino` README.
+2.  Place the custom header files (`LoRaBoards.h`, `SensorQMC6310.hpp`, `SensorQMI8658.hpp`, `RS-FEC.h`) in the same directory as the `Transmit_Interrupt.ino` sketch.
+3.  Connect the hardware components to the microcontroller according to the pin definitions in `LoRaBoards.h` and the sensor documentation.
+4.  Upload the `Transmit_Interrupt.ino` sketch to the Arduino board.
 
 ### Configuration (Transmitter)
 
@@ -78,14 +80,16 @@ Key configuration parameters in `Transmit_Interrupt.ino` include:
 
 Once running, the transmitter will:
 
-1.  Initialize the connected sensors.
-2.  Continuously read data from the sensors at the defined interval.
-3.  Format the sensor data into CCSDS packets.
-4.  Encode the packets using Reed-Solomon FEC.
-5.  Transmit the encoded packets via LoRa radio.
-6.  Optionally display sensor readings on the U8g2 display, cycling through different screens.
+1.  Initialize the connected sensors.
+2.  Continuously read data from the sensors at the defined interval.
+3.  Format the sensor data into CCSDS packets.
+4.  Encode the packets using Reed-Solomon FEC.
+5.  Transmit the encoded packets via LoRa radio.
+6.  Optionally display sensor readings on the U8g2 display, cycling through different screens.
 
 ## Receiver (`Receive_Interrupt.ino`)
+
+**(Full code available at: [https://github.com/Tanay7/Spacecraft-Telemetry/tree/main/Spacecraft%20Telemetry%20Receiver](https://github.com/Tanay7/Spacecraft-Telemetry/tree/main/Spacecraft%20Telemetry%20Receiver))**
 
 ### Overview
 
@@ -118,10 +122,10 @@ The receiver code simulates a ground station that listens for telemetry data tra
 
 ### Installation (Receiver)
 
-1.  Install the Arduino IDE and the required libraries as detailed in the individual `Receive_Interrupt.ino` README.
-2.  Place the custom header file (`LoRaBoards.h`, `RS-FEC.h`) in the same directory as the `Receive_Interrupt.ino` sketch.
-3.  Connect the LoRa transceiver and the U8g2 display to the microcontroller according to the pin definitions in `LoRaBoards.h`.
-4.  Upload the `Receive_Interrupt.ino` sketch to the Arduino board.
+1.  Install the Arduino IDE and the required libraries as detailed in the individual `Receive_Interrupt.ino` README.
+2.  Place the custom header file (`LoRaBoards.h`, `RS-FEC.h`) in the same directory as the `Receive_Interrupt.ino` sketch.
+3.  Connect the LoRa transceiver and the U8g2 display to the microcontroller according to the pin definitions in `LoRaBoards.h`.
+4.  Upload the `Receive_Interrupt.ino` sketch to the Arduino board.
 
 ### Configuration (Receiver)
 
@@ -135,13 +139,13 @@ Key configuration parameters in `Receive_Interrupt.ino` include:
 
 Once running, the receiver will:
 
-1.  Initialize the LoRa radio and start listening for incoming packets.
-2.  Upon receiving a packet, it will demodulate the LoRa signal.
-3.  Decode the Reed-Solomon FEC.
-4.  Verify the CRC-16 checksum.
-5.  Extract the sensor data from the CCSDS packet.
-6.  Display the received telemetry data and system status (RSSI, SNR, error counts) on the U8g2 display, cycling through different screens.
-7.  Log detailed packet information to the Serial Monitor.
+1.  Initialize the LoRa radio and start listening for incoming packets.
+2.  Upon receiving a packet, it will demodulate the LoRa signal.
+3.  Decode the Reed-Solomon FEC.
+4.  Verify the CRC-16 checksum.
+5.  Extract the sensor data from the CCSDS packet.
+6.  Display the received telemetry data and system status (RSSI, SNR, error counts) on the U8g2 display, cycling through different screens.
+7.  Log detailed packet information to the Serial Monitor.
 
 ## Communication Protocol
 
