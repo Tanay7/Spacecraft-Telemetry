@@ -10,7 +10,7 @@ This project simulates a basic spacecraft telemetry system, demonstrating the fu
 
 The design of this telemetry system draws inspiration from real-world spacecraft missions, most notably the Voyager 1 mission. Launched in 1977, Voyager 1 is one of humanity's most iconic deep space probes, currently exploring interstellar space billions of miles from Earth. Its communication system provides a compelling example of the challenges and solutions involved in transmitting data over vast distances.
 
-[![Voyager 1 Spacecraft](https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Voyager_spacecraft_model.jpg/800px-Voyager_spacecraft_model.jpg)](https://en.wikipedia.org/wiki/Voyager_1)
+[![Voyager 1 Spacecraft]([https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Voyager_spacecraft_model.jpg/800px-Voyager_spacecraft_model.jpg)](https://en.wikipedia.org/wiki/Voyager_1](https://github.com/Tanay7/Spacecraft-Telemetry/blob/main/images/Voyager_1.jpg))
 *A model of the Voyager spacecraft. (Image source: Wikipedia)*
 
 * **Deep Space Network (DSN):** Voyager 1 communicates with Earth using NASA's Deep Space Network, a network of large parabolic radio antennas located around the world. These antennas are highly sensitive to the faint signals received from deep space probes. Our simulation uses LoRa, a lower-power, shorter-range radio technology, but the concept of a dedicated network for receiving spacecraft data is analogous.
