@@ -1,5 +1,5 @@
 
-# Project Plan: LoRa CCSDS Telemetry System
+# Project Plan: Simulated Voyager 1 CCSDS Telemetry System
 
 **Version:** 1.1
 **Date:** 2025-04-05
