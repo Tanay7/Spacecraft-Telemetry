@@ -4,8 +4,6 @@
 **Date:** 2025-04-05
 **Prepared By:** Tanay C
 
-Okay, reverting to the detailed project plan format based on the structure and content of the combined script (which heavily used Script 1).
-
 ## 1. Project Overview & Executive Summary
 
 This project aims to implement and validate a robust telemetry system simulating spacecraft data transmission using LoRa radio communication. The system consists of a Transmitter (Tx) unit, based on the provided TelemetryTx.ino Arduino code, and a corresponding Receiver (Rx) unit to be developed. The Tx unit integrates multiple sensors (Environmental: BME280; Magnetic: QMC6310; Inertial/Temp: QMI8658; Positioning: GPS; Power: PMU) and formats the collected data into Consultative Committee for Space Data Systems (CCSDS) Application Packets (AP). Data integrity and reliability over the LoRa link are enhanced using Reed-Solomon Forward Error Correction (RS-FEC - specifically RS(255, 223)) and a CRC-16 checksum. The system operates on the 433 MHz ISM band using SX1262 LoRa transceivers. An optional U8g2 display on the Tx provides local status visualization. The Rx unit will be designed to receive the LoRa transmissions, perform RS-FEC decoding, validate data integrity via CRC, parse the CCSDS packet structure, and make the telemetry data available (e.g., via serial output for logging or further processing). The project emphasizes adherence to the specified protocols (CCSDS, RS-FEC) and thorough testing of all components and the integrated system. The context draws parallels to systems like Voyager 1 in terms of using standardized packet formats and error correction for reliable data transmission.
