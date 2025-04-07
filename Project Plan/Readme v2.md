@@ -1,8 +1,8 @@
 # Project Plan: Simulated Voyager 1 CCSDS Telemetry System
 
-**Version:** 1.1
-**Date:** 2025-04-05
-**Prepared By:** Tanay C
+**Version:** 1.2 (Merged)
+**Date:** 2025-04-07
+**Prepared By:** Tanay C (Combined by AI)
 
 ---
 
@@ -64,12 +64,17 @@ This project aims to implement and validate a robust telemetry system simulating
 * Development of custom sensor hardware or drivers beyond integrating existing libraries specified or implied (`Adafruit_BME280`, `SensorQMC6310`, `SensorQMI8658`, `TinyGPS++`). Requires confirmation that `SensorQMC6310.hpp`, `SensorQMI8658.hpp`, `RS-FEC.h` and `LoRaBoards.h` are available and functional.
 * Environmental hardening or testing (e.g., temperature extremes, vibration, vacuum).
 * Long-range field testing beyond basic lab/office range verification.
+* Flight testing or deployment of the system.
 * Development of a graphical user interface (GUI) for the receiver beyond serial output or a basic display (if added to Rx).
-* Integration with actual Deep Space Network (DSN) or other professional ground station systems.
+* Integration with actual Deep Space Network (DSN) or other professional ground station systems or external systems.
 * Formal security analysis or implementation of encryption beyond the inherent properties of LoRa.
 * Mass production optimization or manufacturing plan.
-* Power consumption optimization beyond basic PMU monitoring.
+* Detailed power budget analysis or power consumption optimization beyond basic PMU monitoring.
 * Development or procurement of specific antenna systems beyond standard LoRa module antennas.
+* Advanced error handling mechanisms beyond basic sensor initialization checks and the included RS-FEC/CRC.
+* Implementation of extensive data logging or storage functionalities beyond Rx serial output (or optional basic SD card logging on Rx).
+* Over-the-air firmware updates.
+* Physical enclosure design and fabrication.
 
 ### 3.3. Key Deliverables
 
@@ -154,7 +159,7 @@ A **Hybrid Approach** will be adopted, combining phases typical of a Waterfall o
     * 3.6.4. Implement `drawGPSDateTimeScreen` and `drawGPSLocationScreen`.
     * 3.6.5. Test screen cycling logic and display update rate. Verify data formatting (`printf`).
 * 3.7. **Full Tx Integration:**
-    * 3.7.1. Combine all modules into the main `TelemetryTx.ino` structure.
+    * 3.7.1. Combine all modules into the main `Transmit_Interrupt.ino` structure.
     * 3.7.2. Implement main loop logic (`setup()`, `loop()`).
     * 3.7.3. Implement `updateSensorReadings` logic with `sensorUpdateInterval`.
     * 3.7.4. Verify correct sequencing: update sensors -> build packet (incl. CRC, RS) -> transmit -> wait for flag -> repeat.
@@ -295,18 +300,18 @@ A **Hybrid Approach** will be adopted, combining phases typical of a Waterfall o
 
 ## 8. Risk Management Plan
 
-| Risk ID | Risk Description                                                              | Likelihood (1-5) | Impact (1-5) | Risk Score | Mitigation Strategy                                                                                                                             | Responsibility Area |
-| :------ | :---------------------------------------------------------------------------- | :--------------- | :----------- | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------- | :------------------ |
-| R01     | Hardware component failure or unavailability                                  | 3                | 4            | 12         | Identify alternative suppliers/components early. Order spares for critical parts (MCU, LoRa). Perform thorough bring-up tests.                      | Hardware Eng.       |
-| R02     | Library incompatibility or bugs (`RadioLib`, Sensors, RS-FEC)                   | 3                | 4            | 12         | Verify library compatibility with target MCU & each other early. Check library issue trackers. Allocate time for debugging/patching/alternative finding. | Software Eng.       |
-| R03     | Issues with custom/provided libraries (`SensorQMC/QMI`, `RS-FEC`, `LoRaBoards.h`) | 4                | 4            | 16         | **PRIORITY:** Validate these libraries thoroughly in Phase 1/2. If non-functional, requires significant re-planning/development effort. Seek source/support. | Software Eng./PM    |
-| R04     | CCSDS packet structure definition error/ambiguity                               | 2                | 3            | 6          | Cross-reference `CCSDSPacket` struct with CCSDS standards (Blue Book). Verify field packing and byte order (endianness if crossing platforms).      | Software Eng.       |
-| R05     | RS-FEC implementation error (encoding/decoding)                                 | 3                | 5            | 15         | Use reference implementation/test vectors for RS library. Test rigorously with induced errors. Verify correct message/parity lengths are used.      | Software Eng.       |
-| R06     | LoRa communication range/reliability issues                                     | 3                | 3            | 9          | Optimize LoRa parameters (SF, Power - within limits). Ensure good antenna placement. Test in target lab environment early. Shielding/Interference check. | Hardware/Software Eng.|
-| R07     | GPS signal acquisition difficulties (indoor testing)                            | 4                | 2            | 8          | Test GPS outdoors or near window. Implement robust handling for invalid GPS data in Tx/Rx logic. Use GPS simulator if available.                       | Software/Test Eng.  |
-| R08     | Integration challenges between modules                                        | 3                | 4            | 12         | Adopt iterative integration. Use stubs/mocks for unit testing. Perform integration tests frequently. Allocate buffer time for debugging.              | Software Eng.       |
-| R09     | Power Management Unit (PMU) access issues                                     | 2                | 3            | 6          | Verify PMU type and correct library/API usage for the specific board early.                                                                       | Hardware/Software Eng.|
-| R10     | Scope Creep                                                                   | 2                | 3            | 6          | Strictly adhere to defined scope (Section 3). Implement formal change request process.                                                            | Project Management  |
+| Risk ID | Risk Description                                                          | Likelihood (1-5) | Impact (1-5) | Risk Score | Mitigation Strategy                                                                                                                                                 | Responsibility Area |
+| :------ | :------------------------------------------------------------------------ | :--------------- | :----------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------ |
+| R01     | Hardware component failure or unavailability                              | 3                | 4            | 12         | Identify alternative suppliers/components early. Order spares for critical parts (MCU, LoRa). Perform thorough bring-up tests.                                            | Hardware Eng.       |
+| R02     | Library incompatibility or bugs (`RadioLib`, Sensors, RS-FEC)               | 3                | 4            | 12         | Verify library compatibility with target MCU & each other early. Check library issue trackers. Allocate time for debugging/patching/alternative finding.                | Software Eng.       |
+| R03     | Issues with custom/provided libraries (`SensorQMC/QMI`, `RS-FEC`, `LoRaBoards.h`) | 4                | 4            | 16         | **PRIORITY:** Validate these libraries thoroughly in Phase 1/2. If non-functional, requires significant re-planning/development effort. Seek source/support.          | Software Eng./PM    |
+| R04     | CCSDS packet structure definition error/ambiguity                         | 2                | 3            | 6          | Cross-reference `CCSDSPacket` struct with CCSDS standards (Blue Book). Verify field packing and byte order (endianness if crossing platforms).                         | Software Eng.       |
+| R05     | RS-FEC implementation error (encoding/decoding)                           | 3                | 5            | 15         | Use reference implementation/test vectors for RS library. Test rigorously with induced errors. Verify correct message/parity lengths are used.                          | Software Eng.       |
+| R06     | LoRa communication range/reliability issues                               | 3                | 3            | 9          | Optimize LoRa parameters (SF, Power - within limits). Ensure good antenna placement. Test in target lab environment early. Shielding/Interference check.                | Hardware/Software Eng.|
+| R07     | GPS signal acquisition difficulties (indoor testing)                      | 4                | 2            | 8          | Test GPS outdoors or near window (Galway). Implement robust handling for invalid GPS data in Tx/Rx logic. Use GPS simulator if available.                            | Software/Test Eng.  |
+| R08     | Integration challenges between modules                                    | 3                | 4            | 12         | Adopt iterative integration. Use stubs/mocks for unit testing. Perform integration tests frequently. Allocate buffer time for debugging.                                | Software Eng.       |
+| R09     | Power Management Unit (PMU) access issues                               | 2                | 3            | 6          | Verify PMU type and correct library/API usage for the specific board early.                                                                                       | Hardware/Software Eng.|
+| R10     | Scope Creep                                                               | 2                | 3            | 6          | Strictly adhere to defined scope (Section 3). Implement formal change request process.                                                                              | Project Management  |
 
 *(Likelihood: 1=Very Low, 5=Very High; Impact: 1=Very Low, 5=Very High; Risk Score = L \* I)*
 
@@ -366,7 +371,7 @@ The project will be considered successful upon meeting the following criteria:
 
 1.  **Functional Tx Unit:** The transmitter unit successfully initializes all sensors, reads data, formats it into CCSDS packets, calculates CRC, encodes with RS(255, 223), and transmits via LoRa using the specified parameters. The display cycles through screens showing relevant data.
 2.  **Functional Rx Unit:** The receiver unit successfully receives LoRa packets, decodes RS(255, 223) data (correcting errors where possible), validates CRC, parses the CCSDS packet structure, and outputs the correct telemetry data via the defined mechanism (e.g., Serial).
-3.  **End-to-End Communication:** The integrated system demonstrates reliable transmission and reception of telemetry packets in a lab environment, with received data accurately matching transmitted data (within sensor tolerances). RS-FEC and CRC mechanisms demonstrably improve robustness or correctly flag errors.
+3.  **End-to-End Communication:** The integrated system demonstrates reliable transmission and reception of telemetry packets in a lab environment (e.g., within Galway test site), with received data accurately matching transmitted data (within sensor tolerances). RS-FEC and CRC mechanisms demonstrably improve robustness or correctly flag errors.
 4.  **Deliverables Complete:** All key deliverables (Hardware Units, Firmware, Documentation, Test Results) as listed in Section 3.3 are completed, reviewed, and approved.
 5.  **Scope Adherence:** The project is completed within the defined scope (Section 3).
 6.  **Formal Acceptance:** Formal sign-off based on a final demonstration and review of deliverables.
