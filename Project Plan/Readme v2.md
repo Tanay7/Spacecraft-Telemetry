@@ -8,13 +8,13 @@
 
 ## 1. Project Overview & Executive Summary
 
-This project aims to implement and validate a robust telemetry system simulating spacecraft data transmission using LoRa radio communication. The system consists of a Transmitter (Tx) unit, based on the provided `TelemetryTx.ino` Arduino code, and a corresponding Receiver (Rx) unit to be developed. The Tx unit integrates multiple sensors (Environmental: BME280; Magnetic: QMC6310; Inertial/Temp: QMI8658; Positioning: GPS; Power: PMU) and formats the collected data into Consultative Committee for Space Data Systems (CCSDS) Application Packets (AP). Data integrity and reliability over the LoRa link are enhanced using Reed-Solomon Forward Error Correction (RS-FEC - specifically RS(255, 223)) and a CRC-16 checksum. The system operates on the 433 MHz ISM band using SX1262 LoRa transceivers. An optional U8g2 display on the Tx provides local status visualization. The Rx unit will be designed to receive the LoRa transmissions, perform RS-FEC decoding, validate data integrity via CRC, parse the CCSDS packet structure, and make the telemetry data available (e.g., via serial output for logging or further processing). The project emphasizes adherence to the specified protocols (CCSDS, RS-FEC) and thorough testing of all components and the integrated system. The context draws parallels to systems like Voyager 1 in terms of using standardized packet formats and error correction for reliable data transmission.
+This project aims to implement and validate a robust telemetry system simulating spacecraft data transmission using LoRa radio communication. The system consists of a Transmitter (Tx) unit, based on the provided `Transmit_Interrupt.ino` Arduino code, and a corresponding Receiver (Rx) unit to be developed. The Tx unit integrates multiple sensors (Environmental: BME280; Magnetic: QMC6310; Inertial/Temp: QMI8658; Positioning: GPS; Power: PMU) and formats the collected data into Consultative Committee for Space Data Systems (CCSDS) Application Packets (AP). Data integrity and reliability over the LoRa link are enhanced using Reed-Solomon Forward Error Correction (RS-FEC - specifically RS(255, 223)) and a CRC-16 checksum. The system operates on the 433 MHz ISM band using SX1262 LoRa transceivers. An optional U8g2 display on the Tx provides local status visualization. The Rx unit will be designed to receive the LoRa transmissions, perform RS-FEC decoding, validate data integrity via CRC, parse the CCSDS packet structure, and make the telemetry data available (e.g., via serial output for logging or further processing). The project emphasizes adherence to the specified protocols (CCSDS, RS-FEC) and thorough testing of all components and the integrated system. The context draws parallels to systems like Voyager 1 in terms of using standardized packet formats and error correction for reliable data transmission.
 
 ---
 
 ## 2. Project Goals & Objectives
 
-* **Goal 1:** Develop a fully functional Transmitter (Tx) unit based on the provided `TelemetryTx.ino` code, ensuring correct sensor integration, data acquisition, CCSDS packet formatting, RS-FEC encoding, and LoRa transmission.
+* **Goal 1:** Develop a fully functional Transmitter (Tx) unit based on the provided `Transmit_Interrupt.ino` code, ensuring correct sensor integration, data acquisition, CCSDS packet formatting, RS-FEC encoding, and LoRa transmission.
     * *Objective 1.1:* Successfully initialize and read data periodically from BME280, QMC6310, QMI8658, GPS, and PMU sensors.
     * *Objective 1.2:* Correctly assemble sensor data and metadata into the defined `CCSDSPacket` structure, including primary header fields (Version, Type, Sec Hdr Flag, APID, Seq Flags, Seq Count, Packet Length), Spacecraft ID, mission time, sensor payloads, message string.
     * *Objective 1.3:* Implement and verify the CRC-16 (CCITT-FALSE) calculation over the packet data (excluding the CRC field itself).
@@ -43,7 +43,7 @@ This project aims to implement and validate a robust telemetry system simulating
 
 ### 3.1. Inclusions
 
-* Refinement and validation of the provided `TelemetryTx.ino` code.
+* Refinement and validation of the provided `Transmit_Interrupt.ino` code.
 * Hardware setup and configuration for both Tx and Rx units using Arduino-compatible platforms and SX1262 modules.
 * Integration and testing of all specified sensors (BME280, QMC6310, QMI8658, GPS, PMU) on the Tx unit.
 * Implementation and verification of CCSDS AP formatting on Tx.
@@ -75,8 +75,8 @@ This project aims to implement and validate a robust telemetry system simulating
 
 * Functional Transmitter (Tx) Hardware Unit.
 * Functional Receiver (Rx) Hardware Unit.
-* Validated and documented Transmitter Firmware (`TelemetryTx.ino` and dependencies).
-* Validated and documented Receiver Firmware.
+* Validated and documented Transmitter Firmware (`Transmit_Interrupt.ino` and dependencies).
+* Validated and documented Receiver Firmware (`Receive_Interrupt.ino` and dependencies).
 * Test Plan and Test Results Documentation.
 * System Technical Specification Document.
 * Basic User Guide.
@@ -189,7 +189,7 @@ A **Hybrid Approach** will be adopted, combining phases typical of a Waterfall o
     * 4.5.3. (Optional) Implement logging to SD card if hardware supports it.
     * 4.5.4. (Optional) Add a basic display to the Rx unit.
 * 4.6. **Full Rx Integration:**
-    * 4.6.1. Combine all Rx modules into a main Receiver sketch (`TelemetryRx.ino`).
+    * 4.6.1. Combine all Rx modules into a main Receiver sketch (`Receive_Interrupt.ino`).
     * 4.6.2. Implement main loop logic for continuous reception, decoding, validation, parsing, and output.
     * 4.6.3. Test overall Rx functionality and error handling.
 
