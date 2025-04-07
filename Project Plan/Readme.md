@@ -77,7 +77,7 @@ This project aims to implement and validate a robust telemetry system simulating
 * Functional Transmitter (Tx) Hardware Unit.
 * Functional Receiver (Rx) Hardware Unit.
 * Validated and documented Transmitter Firmware (`Transmit_Interrupt.ino` and dependencies).
-* Validated and documented Receiver Firmware.
+* Validated and documented Receiver Firmware (`Receive_Interrupt.ino` and dependencies). 
 * Test Plan and Test Results Documentation.
 * System Technical Specification Document.
 * Basic User Guide.
