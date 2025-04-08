@@ -250,5 +250,4 @@ This project draws inspiration from real spacecraft telemetry systems:
 
 ## 📄 License
 
-(Specify your license here, e.g., MIT, GPL, Apache 2.0, or leave as is if unsure)
 This project is provided as-is for educational purposes. No license specified.
