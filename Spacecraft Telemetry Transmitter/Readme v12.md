@@ -76,15 +76,15 @@ This project requires careful library management:
 * **Core Communication:**
     * [**RadioLib**](https://github.com/jgromes/RadioLib) (`RadioLib.h`): For SX1262 LoRa interaction.
 * **Board Abstraction & Configuration:**
-    * **`LoRaBoards.h`**: **❗ CRITICAL CUSTOM FILE ❗** This header is *not* provided by a standard library. **You MUST create or adapt this file** for your specific hardware. It defines pin mappings, hardware peripheral instances (`SPI`, `Wire`, `SerialGPS`), and contains the `setupBoards()` function for board-specific initialization (e.g., PMU setup).
+    * **`LoRaBoards.h`**: **❗ CRITICAL CUSTOM FILE ❗** This header is *not* provided by a standard library. **You MUST create or adapt this file** for your specific hardware. It defines pin mappings, hardware peripheral instances (`SPI`, `Wire`, `SerialGPS`), and contains the `setupBoards()` function for board-specific initialization (e.g., PMU setup, U8g2 constructor).
 * **Sensor Libraries:**
     * [**Adafruit BME280 Library**](https://github.com/adafruit/Adafruit_BME280_Library) (`Adafruit_BME280.h`): Interface for the BME280 sensor.
     * [**Adafruit Unified Sensor Driver**](https://github.com/adafruit/Adafruit_Sensor) (`Adafruit_Sensor.h`): Required dependency for the Adafruit BME280 library.
-    * **`SensorQMC6310.hpp`**: Custom library/driver for the QMC6310 magnetometer. *(Ensure you have the correct source code - link unavailable in source material).*
-    * **`SensorQMI8658.hpp`**: Custom library/driver for the QMI8658 IMU. *(Ensure you have the correct source code - link unavailable in source material).*
+    * **`SensorQMC6310.hpp`**: Custom library/driver for the QMC6310 magnetometer. *(Source code required separately - link unavailable in source material).*
+    * **`SensorQMI8658.hpp`**: Custom library/driver for the QMI8658 IMU. *(Source code required separately - link unavailable in source material).*
 * **Data Processing & Utility:**
     * [**TinyGPS++**](http://arduinogps.jjoe.org/) (`TinyGPS++.h`): Robust library for parsing NMEA data streams from the GPS module.
-    * **`RS-FEC.h`**: Reed-Solomon Forward Error Correction library for RS(255, 223). *(Ensure you have the correct source code - link unavailable in source material).*
+    * **`RS-FEC.h`**: Reed-Solomon Forward Error Correction library for RS(255, 223). *(Source code required separately - link unavailable in source material).*
     * `math.h`: Standard C library for mathematical functions (`pow`, `atan2`, `M_PI`).
     * `stdio.h`: Standard C library for functions like `sprintf`.
 * **Display:**
@@ -116,6 +116,7 @@ This project requires careful library management:
     * All pin assignments for Radio (CS, DIO1, BUSY, RST), Sensors (I2C SDA/SCL, SPI CS), GPS (Serial RX/TX), and Display (I2C/SPI pins as needed).
     * The correct `HardwareSerial` instance for `SerialGPS` (e.g., `Serial1`, `Serial2`).
     * Correct hardware peripheral instances (`Wire`, `SPI`) if non-default ones are used.
+    * The correct U8g2 constructor for your specific display and connection (I2C/SPI).
     * Any necessary board-specific initializations within `setupBoards()` (e.g., PMU initialization, power rail enables, clock setup). **Refer to your specific board's documentation and schematics.**
 6.  **Connect Hardware:** Carefully wire all components according to the pin definitions in `LoRaBoards.h`. Use short, reliable connections, especially for SPI. Ensure common ground. Verify antenna connection integrity. Double-check VCC and GND connections and voltage levels.
 7.  **Configure Sketch Parameters:** Open `TelemetryTx.ino` and review the configuration constants near the top (LoRa settings, CCSDS ID, `SEALEVELPRESSURE_HPA`, timing intervals). Adjust if necessary. Crucially, update the magnetic `declination` value in `updateQMC6310Data()` for your geographical location (value in radians). See [Configuration Deep Dive](#-configuration-deep-dive) for details.
@@ -182,8 +183,8 @@ Key parameters adjustable in `TelemetryTx.ino` and their implications:
         * Build & Encode Packet: Call `buildTelemetryPacket()`:
             1.  Populate the `CCSDSPacket` struct (`tmPacket`) with the latest sensor data, timestamp (`millis()`), packet counter, etc.
             2.  Calculate the CRC-16 over the packet data (excluding the CRC field itself) and store it in `tmPacket.crc`.
-            3.  Copy the `tmPacket` data (147 bytes) into the `encodedData` buffer (bytes 0-146). The rest of the data portion (bytes 147-222) acts as padding.
-            4.  Call `rs.Encode(encodedData)` to compute the 32 Reed-Solomon parity bytes based on the 223 data bytes and place them in `encodedData` (bytes 223-254).
+            3.  Copy the `tmPacket` data into the `encodedData` buffer (or handle data input directly via the `rs.Encode` method depending on its implementation).
+            4.  Call `rs.Encode()` to compute the 32 Reed-Solomon parity bytes based on the 223-byte data block (payload + padding) and place them appropriately to form the final 255-byte encoded block in `encodedData`.
         * Start Next Transmission: Call `radio.startTransmit(encodedData, sizeof(encodedData))` to begin asynchronously transmitting the 255-byte RS-encoded block.
     * **Update Display (If Enabled):** Call `updateDisplay()` to potentially cycle to the next screen based on `defaultScreenDelay`. Call `drawDisplay()` to render the current screen's content using U8g2 page buffer mode.
     * **Process GPS Data:** Continuously check `SerialGPS.available()` and feed incoming bytes to `gps.encode()` for the TinyGPS++ library to parse NMEA sentences.
@@ -206,7 +207,7 @@ The telemetry data is organized within the `CCSDSPacket` struct, ensuring byte a
 | :--------------------- | :---- | :------- | :------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------- |
 | `version_type_apid`    | 2     | `uint16_t` | CCSDS Primary Header: Packet Identification Field                                                       | Version (3b=`000`), Type (1b=`0`), Sec Hdr (1b=`1`), APID (11b) |
 | `sequence_flags_count` | 2     | `uint16_t` | CCSDS Primary Header: Packet Sequence Control                                                           | Seq Flags (2b=`11`), Packet Seq Count (14b)                |
-| `packet_length`        | 2     | `uint16_t` | CCSDS Primary Header: Packet Data Field Length - 1 (Size of data field = 147 - 6 = 141 bytes -> Value=140) |                                                            |
+| `packet_length`        | 2     | `uint16_t` | CCSDS Primary Header: Packet Data Field Length - 1 (Value: 147 bytes total - 6 header bytes = 141 payload => Value=140) |                                                            |
 | `spacecraft_id`        | 12    | `char[12]` | User-defined spacecraft identifier (e.g., "DSN-2025-001")                                                |                                                            |
 | `mission_time`         | 4     | `uint32_t` | Milliseconds since MCU boot (Mission Elapsed Time)                                                      |                                                            |
 | `temp_bme`             | 4     | `float`  | Temperature from BME280 (°C)                                                                            |                                                            |
@@ -251,10 +252,9 @@ Forward Error Correction (FEC) adds redundancy to data to allow the receiver to 
 * **Error Correction Capability:** This code can correct up to `t = (n - k) / 2 = 16` byte errors occurring anywhere within the 255-byte received block. It can detect more errors than it can correct.
 * **Implementation (`buildTelemetryPacket`):**
     1.  The 147-byte `tmPacket` struct (containing data + CRC) is populated.
-    2.  The contents of `tmPacket` are copied byte-for-byte into the first 147 bytes of the `encodedData` buffer.
-    3.  Bytes 147 to 222 of `encodedData` remain as padding (effectively zero-padded or containing stale data, depending on buffer initialization; the RS calculation only uses these 223 bytes).
-    4.  The `rs.Encode(encodedData)` method calculates the 32 parity bytes based on the 223 data bytes (payload + padding) and places them into `encodedData` at indices 223 to 254.
-    5.  The entire 255-byte `encodedData` buffer is transmitted via LoRa.
+    2.  The data from `tmPacket` is provided as input to the `rs.Encode()` function. *Note: The exact mechanism, including potential internal padding to 223 bytes and handling of the `memcpy` call preceding `rs.Encode` in the current code, depends on the specific `RS-FEC.h` library implementation and could be clarified for robustness.*
+    3.  The `rs.Encode()` method calculates the 32 parity bytes based on the 223-byte data block (payload + padding) and writes the full 255-byte encoded block (padded data + parity bytes) into the `encodedData` buffer.
+    4.  The entire 255-byte `encodedData` buffer is transmitted via LoRa.
 
 ---
 
@@ -262,9 +262,9 @@ Forward Error Correction (FEC) adds redundancy to data to allow the receiver to 
 
 If a U8g2 display is connected and initialized (`displayEnabled = true`):
 
-* **Cycling Mechanism:** The `currentScreen` variable (0-10) tracks the active screen. `updateDisplay()` increments this index every `defaultScreenDelay` milliseconds (e.g., 2000ms), wrapping around.
-* **Rendering (`drawDisplay`):** Uses U8g2's page buffer mode. A `switch` statement calls the appropriate `drawScreenX()` function based on `currentScreen`. Each function clears the buffer (`u8g2->clearBuffer()`), draws formatted text/values using `u8g2->printf()` and the `u8g2_font_6x10_mr` font, and sends the buffer to the display (`u8g2->sendBuffer()`).
-* **Screen Content:**
+* **Cycling Mechanism:** The `currentScreen` variable (0-10) tracks the active screen. `updateDisplay()` increments this index every `defaultScreenDelay` milliseconds (e.g., 2000ms), wrapping around. *Note: Ensure the modulo operator in `updateDisplay` is correct (e.g., `% 11`) to cycle through all 11 defined screens (0-10).*
+* **Rendering (`drawDisplay`):** Uses U8g2's page buffer mode. A `switch` statement calls the appropriate drawing logic based on `currentScreen`. Each screen function clears the buffer (`u8g2->clearBuffer()`), draws formatted text/values using `u8g2->printf()` and the `u8g2_font_6x10_mr` font, and sends the buffer to the display (`u8g2->sendBuffer()`).
+* **Screen Content:** (11 screens total, indexed 0-10)
     * **Screen 0:** QMI8658 Accel (X, Y, Z g), Temp (°C)
     * **Screen 1:** QMI8658 Gyro (X, Y, Z dps)
     * **Screen 2:** BME280 Env (Temp °C, Hum %, Pres hPa, Alt m)
@@ -303,7 +303,7 @@ Basic robustness for critical initialization failures:
     * **`update[Sensor]Data()` functions:** Contain logic to read data from specific sensors (BME280, QMC6310, QMI8658, PMU) and update global variables.
     * **`calculateCRC()`:** Implements the CRC-16-CCITT-FALSE algorithm.
     * **`setFlag()`:** Interrupt Service Routine (ISR) attached to LoRa TxDone interrupt; sets `transmittedFlag = true`.
-    * **`updateDisplay()` / `drawDisplay()` / `drawScreenX()` functions:** Manage display screen cycling and rendering logic.
+    * **`updateDisplay()` / `drawDisplay()` / `drawScreenX()` functions:** Manage display screen cycling and rendering logic. *(Note: Contains some potentially redundant/unused functions like `drawPMUScreen1`/`2`).*
     * **`displayFatalError()`:** Handles critical initialization errors and halts the system.
 * **`LoRaBoards.h` (External, User-Provided):** Defines hardware pin mappings, peripheral configurations, and the `setupBoards()` function. **Must be tailored to the specific hardware.**
 * **Custom Sensor Libraries (External):** `SensorQMC6310.hpp`, `SensorQMI8658.hpp`. Encapsulate I2C/SPI communication and register logic for these sensors. *(Source code required separately).*
@@ -317,17 +317,21 @@ Basic robustness for critical initialization failures:
 * **Data Logging:** Integrate an SD card module to log transmitted telemetry packets for later retrieval and analysis.
 * **Two-Way Communication (Telecommand):** Implement functionality to receive and act upon simple commands sent via LoRa (requires modifying the loop for receive windows/modes).
 * **Power Optimization:** Implement MCU sleep modes (e.g., deep sleep) between transmissions for extended battery life. Requires careful management of wake-up sources (timer, interrupts) and peripheral re-initialization.
-* **Advanced Error Handling:** Implement more nuanced error reporting (e.g., non-fatal sensor read errors) and potential recovery strategies.
+* **Advanced Error Handling:** Implement more nuanced error reporting (e.g., non-fatal sensor read errors) and potential recovery strategies beyond halting on initialization failure.
 * **Dynamic Configuration:** Allow modification of key parameters (e.g., LoRa settings, reporting intervals) via a serial command interface or other means without needing to recompile.
 * **Sensor Fusion:** Implement algorithms (e.g., Madgwick or Mahony filter) using IMU (Accel/Gyro) and Magnetometer data to compute a more stable 3D orientation quaternion or Euler angles.
 * **CCSDS Secondary Header:** Utilize the optional secondary header field for more detailed timestamping (e.g., GPS time) or other metadata.
 * **Sensor Calibration:** Add routines or use libraries to perform runtime or stored calibration for sensors (especially IMU and Magnetometer) to improve accuracy.
+* **Code Refinements:** Address minor issues identified in the current codebase, such as:
+    * Correcting the display screen cycling logic in `updateDisplay` (change `% 10` to `% 11`) to include all 11 defined screens.
+    * Removing unused/redundant functions (e.g., `drawPMUScreen1`, `drawPMUScreen2`) and variables (e.g., `sensorLastUpdateTime`).
+    * Clarifying the interaction between `memcpy` and `rs.Encode` in `buildTelemetryPacket` for robustness and readability based on the specific `RS-FEC.h` library implementation.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues, bug reports, and feature requests are welcome! Please feel free to check the [issues page](https://github.com/YOUR_USERNAME/YOUR_REPOSITORY/issues) of the repository where this code resides or submit a pull request. *(Note: Replace placeholder URL)*
+Contributions, issues, bug reports, and feature suggestions are welcome! Please feel free to check the [issues page](https://github.com/YOUR_USERNAME/YOUR_REPOSITORY/issues) of the repository where this code resides or submit a pull request. *(Note: Replace placeholder URL)*
 
 ---
 
