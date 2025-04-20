@@ -173,7 +173,7 @@ Both the transmitter and receiver include basic error handling mechanisms. The t
 
 ## Contributing
 
-Contributions to this project are welcome. If you find any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request on the project's repository (if hosted on a platform like GitHub).
+Contributions to this project are welcome. If you find any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request on the project's repository.
 
 ## License
 
