@@ -181,7 +181,7 @@ The core code for this project (`Transmit_Interrupt.ino`, `Receive_Interrupt.ino
 
 ## Acknowledgments
 
-* The **RadioLib** library by [mention author/organization] for LoRa communication.
+* The **RadioLib** library by Jan Gromeš for LoRa communication.
 * The **Adafruit BME280 Library** by Adafruit Industries for the BME280 sensor.
 * The **U8g2lib** library by [mention author/organization, typically olikraus] for the display.
 * The **SensorQMC6310** and **SensorQMI8658** libraries (source likely specific to the hardware).
