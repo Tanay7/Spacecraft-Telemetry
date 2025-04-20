@@ -1,4 +1,4 @@
-# Voyager 1 Spacecraft Telemetry System Simulation using T-Beam SUPREME LoRa development board
+# Voyager 1 Telemetry Simulation on T-Beam SUPREME LoRa Board
 
 ## Author: Tanay
 
