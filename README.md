@@ -177,7 +177,7 @@ Contributions to this project are welcome. If you find any issues or have sugges
 
 ## License
 
-[Specify the license under which this code is released, e.g., MIT License, Apache License 2.0, etc.]
+MIT License
 
 ## Acknowledgments
 
