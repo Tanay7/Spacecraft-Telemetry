@@ -185,7 +185,7 @@ MIT License
 * The **Adafruit BME280 Library** by Adafruit Industries for the BME280 sensor.
 * The **U8g2lib** library by [mention author/organization, typically olikraus] for the display.
 * The **SensorQMC6310** and **SensorQMI8658** libraries (source likely specific to the hardware).
-* The **TinyGPS++** library by [mention author, typically Mikal Hart] for GPS parsing.
+* The **TinyGPS++** library by Mikal Hart for GPS parsing.
 * The **RS-FEC** library (source needs to be specified based on where it was obtained).
 * The CCSDS standards provided by the Consultative Committee for Space Data Systems.
 * NASA's **Deep Space Network** and the **Voyager 1** mission for providing real-world context and inspiration.
