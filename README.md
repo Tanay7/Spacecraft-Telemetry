@@ -177,7 +177,7 @@ Contributions to this project are welcome. If you find any issues or have sugges
 
 ## License
 
-MIT License
+The core code for this project (`Transmit_Interrupt.ino`, `Receive_Interrupt.ino`, and associated custom files) is licensed under the MIT License. See the `LICENSE.md` file in the repository for the full text.
 
 ## Acknowledgments
 
