@@ -4,7 +4,7 @@
 
 ## Introduction
 
-This project simulates a basic spacecraft telemetry system, demonstrating the fundamental principles of data acquisition, packetization, error correction, and wireless communication. It consists of two main components: a **transmitter** that simulates a spacecraft gathering sensor data and sending it to Earth, and a **receiver** that simulates a ground station receiving and processing this data. The system utilizes LoRa radio for communication, structures data into CCSDS (Consultative Committee for Space Data Systems) compliant packets, and employs Reed-Solomon Forward Error Correction (RS-FEC) for robust data transmission. **This project was built and tested using the LilyGO T-Beam Supreme module.**
+This project simulates a basic spacecraft telemetry system, demonstrating the fundamental principles of data acquisition, packetization, error correction, and wireless communication. It consists of two main components: a **transmitter** that simulates a spacecraft gathering sensor data and sending it to Earth, and a **receiver** that simulates a ground station receiving and processing this data. The system utilizes LoRa radio for communication, structures data into CCSDS (Consultative Committee for Space Data Systems) compliant packets, and employs Reed-Solomon Forward Error Correction (RS-FEC) for robust data transmission. **This project was built and tested using the LilyGO T-Beam S3 Supreme L76K.**
 
 ## Voyager 1 Context
 
