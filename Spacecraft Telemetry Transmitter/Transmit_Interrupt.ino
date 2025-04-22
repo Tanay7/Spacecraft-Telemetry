@@ -2,10 +2,10 @@
 
 
 /**
- * @file TelemetryTx_Revised_FixedBME.ino
+ * @file TelemetryTx.ino
  * @brief Spacecraft Telemetry Transmitter (LoRa) with Sensors, CCSDS-like structure, CRC, and RS-FEC.
- * @version 2.1.1 (Comment Enhancement)
- * @date 2025-04-11 (Based on user request date, comments updated 2025-04-11)
+ * @version 2.1.1 
+ * @date 2025-04-11
  *
  * @description
  * This Arduino sketch implements a telemetry transmitter simulating a spacecraft's data downlink.
