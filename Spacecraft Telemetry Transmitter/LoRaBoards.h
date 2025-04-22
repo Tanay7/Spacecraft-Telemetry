@@ -1,10 +1,10 @@
 /**
  * @file      boards.h
- * @author    Lewis He (lewishe@outlook.com)
+ * @author    Tanay C.
  * @license   MIT
- * @copyright Copyright (c) 2024  ShenZhen XinYuan Electronic Technology Co., Ltd
- * @date      2024-04-25
- * @last-update 2024-08-07
+ * @copyright Copyright (c) 2025  Tanay C.
+ * @date      2025-04-22
+ * @last-update 2025-04-22
  */
 
 #pragma once
